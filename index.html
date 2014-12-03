@@ -1,47 +1,104 @@
 <!doctype html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Product Comments</title>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-        <link rel="stylesheet" href="css/main.css">
-    </head>
-    <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Product Reviews</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <script src="lib/angular-1.3.1/angular.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.11.2/ui-bootstrap-tpls.min.js"></script>
+</head>
+<body>
 
-        <main class="container">
-            <section>
-                <img src="img/super-bass-o-matic-76.jpg" alt="product picture" class="product-picture">
-                <h1>The Super Bass-o-Matic '76</h1>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officia cumque deserunt ullam repudiandae nisi corporis! Ipsum, ducimus commodi, itaque porro distinctio consequuntur! Autem doloremque numquam nemo ex nulla tempora quis! Lorem ipsum dolor sit amet, consectetur adipisicing elit. Unde nihil doloribus excepturi quisquam error possimus veritatis facere, commodi cumque ab atque dolore ducimus obcaecati ipsa, impedit! Consequuntur, eligendi iure cumque!</p>
-            </section>
+<main class="container" ng-app="ProductReviewApp" ng-controller="ReviewController">
+    <section>
+        <img src="img/super-bass-o-matic-76.jpg" alt="product picture" class="product-picture">
 
-            <section>
+        <h1>The Super Bass-o-Matic '76</h1>
+
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Officia cumque deserunt ullam repudiandae nisi
+            corporis!
+            Ipsum, ducimus commodi, itaque porro distinctio consequuntur! Autem doloremque numquam nemo ex nulla tempora
+            quis!
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Unde nihil doloribus excepturi quisquam error
+            possimus
+            veritatis facere, commodi cumque ab atque dolore ducimus obcaecati ipsa, impedit! Consequuntur, eligendi
+            iure
+            cumque!
+        </p>
+    </section>
+
+    <section>
+        <div class="row commentHeader">
+            <div class="col-md-12">
                 <h2>Add a Comment</h2>
-                <!--  
-                put a form here for entering a new comment
-                the user must select a rating, and enter a name, title, and comment body
-                before the comment can be saved to the server
-                for the rating selection, use the Angular Bootstrap Rating directive 
-                http://angular-ui.github.io/bootstrap/#/rating
-                their script file is included below
-                -->
-            </section>
+            </div>
+        </div>
 
-            <section>
-                <h2>Comments</h2>
-                <!-- 
-                display existing comments here
-                each comment should also have UI allowing the user to vote up/down the comment
-                as well as delete it
-                 -->
-            </section>
+        <form name="commentForm" id="commentForm" ng-submit="addTask()">
+            <div class="form-group">
+                <label for="task-title">Review Name</label>
+                <input type="text" id="task-title" class="form-control"
+                       placeholder="Title of your review" ng-model="newTask.title" required>
+            </div>
+            <div class="form-group">
+                <label for="task-author">Author</label>
+                <input type="text" id="task-author" class="form-control"
+                       placeholder="Your name" ng-model="newTask.author" required>
+            </div>
+            <div class="form-group">
+                <label for="task-comment">Comment</label>
+                <input type="text" id="task-comment" class="form-control"
+                       placeholder="Please write your comment" ng-model="newTask.comment" required>
+            </div>
+            <div class="form-group">
+                <label for="rating">Rating</label>
+                <rating max="5" ng-model="newTask.rating"></rating>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary" ng-disabled="inserting">Submit Comment</button>
+            </div>
+        </form>
+    </section>
 
-        </main>
+    <section>
+        <h2>Comments</h2>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-rc.2/angular.min.js"></script>
-        <script src="lib/ui-bootstrap-tpls-0.11.0.min.js"></script>
-        <script src="js/app.js"></script>
-    </body>
+        <p>
+            <button class="btn btn-primary" ng-click="refreshTasks(task)">Refresh Page</button>
+        </p>
+        <div>
+            <img src="img/ajax-spinner.gif" alt="ajax spinner" id="ajax" ng-if="!tasks.length">
+        </div>
+        <li ng-repeat="task in tasks" ng-class="{exists: task.exists}" ng-if="tasks.length">
+            <div class="row top">
+                <div class="col-md-10">
+                    <h4 class="title">{{task.title}}</h4>
+                </div>
+                <div class="col-md-2">
+                    <button id="deleteButton" class="btn btn-primary" ng-click="deleteTask(task)">Delete Comment</button>
+                </div>
+            </div>
+            <p class="rating">Rating:
+                <rating max="5" ng-model="task.rating" ng-change="updateTask(task)" readonly="task.exists"></rating>
+            </p>
+            <p class="author">By <i>{{task.author}}</i></p>
+
+            <p class="comment">{{task.comment}}</p>
+
+            <p class="score">{{task.votes || 0}}
+                <span class="glyphicon glyphicon-thumbs-up" ng-click="incrementVotes(task, 1)"></span>
+                <span class="glyphicon glyphicon-thumbs-down" ng-click="incrementVotes(task, -1)"></span></p>
+        </li>
+        <p class="emptyCheck" id="emptyCheck" ng-if="!tasks.length">No comments yet. Be the first to review this!</p>
+
+    </section>
+
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0-rc.2/angular.min.js"></script>
+<script src="lib/ui-bootstrap-tpls-0.11.0.min.js"></script>
+<script src="js/app.js"></script>
+</body>
 </html>
